@@ -20,7 +20,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/briandowns/spinner"
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -57,14 +59,16 @@ to quickly create a Cobra application.`,
 			return fmt.Errorf("error getting messages file: %w", err)
 		}
 
-		bytes, err := os.ReadFile(messagesFile)
-		if err != nil {
-			return fmt.Errorf("error reading file: %w", err)
-		}
+		if messagesFile != "" {
+			bytes, err := os.ReadFile(messagesFile)
+			if err != nil {
+				return fmt.Errorf("error reading file: %w", err)
+			}
 
-		err = json.Unmarshal(bytes, &messages)
-		if err != nil {
-			return fmt.Errorf("error unmarshalling json: %w", err)
+			err = json.Unmarshal(bytes, &messages)
+			if err != nil {
+				return fmt.Errorf("error unmarshalling json: %w", err)
+			}
 		}
 
 		if prompt != "" {
@@ -74,6 +78,9 @@ to quickly create a Cobra application.`,
 			})
 		}
 
+		s := spinner.New(spinner.CharSets[26], 250*time.Millisecond)
+		s.Start()
+
 		resp, err := client.CreateChatCompletion(
 			context.Background(),
 			openai.ChatCompletionRequest{
@@ -82,6 +89,8 @@ to quickly create a Cobra application.`,
 				Messages:    messages,
 			},
 		)
+
+		s.Stop()
 
 		if err != nil {
 			return err
