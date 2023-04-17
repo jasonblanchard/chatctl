@@ -106,6 +106,8 @@ to quickly create a Cobra application.`,
 			fmt.Println(resp.Choices[0].Message.Content)
 		}
 
+		// TODO: Allow writing back to file to make it work like a chat
+
 		return nil
 	},
 }
