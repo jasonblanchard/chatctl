@@ -54,7 +54,7 @@ to quickly create a Cobra application.`,
 
 		messages := []openai.ChatCompletionMessage{}
 
-		messagesFile, err := cmd.Flags().GetString("messages")
+		messagesFile, err := cmd.Flags().GetString("file")
 		if err != nil {
 			return fmt.Errorf("error getting messages file: %w", err)
 		}
@@ -96,6 +96,8 @@ to quickly create a Cobra application.`,
 			return err
 		}
 
+		assistantContent := resp.Choices[0].Message.Content
+
 		if useJson {
 			bytes, err := json.Marshal(resp)
 			if err != nil {
@@ -103,10 +105,28 @@ to quickly create a Cobra application.`,
 			}
 			fmt.Println(string(bytes))
 		} else {
-			fmt.Println(resp.Choices[0].Message.Content)
+			fmt.Println(assistantContent)
 		}
 
-		// TODO: Allow writing back to file to make it work like a chat
+		outfile, err := cmd.Flags().GetString("out")
+		if err != nil {
+			return fmt.Errorf("error getting out file: %w", err)
+		}
+
+		if outfile != "" {
+			messages = append(messages, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleAssistant,
+				Content: assistantContent,
+			})
+
+			outJson, err := json.MarshalIndent(messages, "", "    ")
+
+			if err != nil {
+				return fmt.Errorf("error marshaling out json: %w", err)
+			}
+
+			os.WriteFile(outfile, []byte(outJson), 0666)
+		}
 
 		return nil
 	},
@@ -125,5 +145,6 @@ func init() {
 	// is called directly, e.g.:
 	chatCmd.Flags().BoolP("json", "j", false, "Output result as JSON")
 	chatCmd.Flags().StringP("prompt", "p", "", "Single user prompt for simple instructions")
-	chatCmd.Flags().StringP("messages", "m", "", "Path to a file with message input")
+	chatCmd.Flags().StringP("file", "f", "", "Path to a file with message input")
+	chatCmd.Flags().StringP("out", "o", "", "Path to outfile to write conversation to")
 }
