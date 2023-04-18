@@ -9,9 +9,11 @@ require (
 	github.com/sashabaranov/go-openai v1.4.1
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
+	github.com/tiktoken-go/tokenizer v0.1.0
 )
 
 require (
+	github.com/dlclark/regexp2 v1.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
